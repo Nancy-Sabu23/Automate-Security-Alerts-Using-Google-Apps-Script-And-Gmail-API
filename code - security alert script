@@ -1,0 +1,43 @@
+Code For Security Alert Script
+
+function checkForPhishingEmails() {
+  var threads = GmailApp.search('newer_than:1d'); // Scan emails from the last 24 hours
+  var phishingKeywords = ["urgent", "click here", "reset password", "account locked", "verify", "unusual activity", "security alert"];
+  var alertEmail = "your-email@gmail.com"; // Change this to your email for alerts
+  var flaggedEmails = [];
+
+  for (var i = 0; i < threads.length; i++) {
+    var messages = threads[i].getMessages();
+    for (var j = 0; j < messages.length; j++) {
+      var message = messages[j];
+      var subject = message.getSubject();
+      var body = message.getPlainBody();
+      
+      for (var k = 0; k < phishingKeywords.length; k++) {
+        if (body.toLowerCase().includes(phishingKeywords[k]) || subject.toLowerCase().includes(phishingKeywords[k])) {
+          message.moveToTrash(); // Moves the message to Trash instead of Spam // Move to Spam folder
+          flaggedEmails.push("📌 *Subject:* " + subject + "\n" + "🔗 *From:* " + message.getFrom());
+          break;
+        }
+      }
+    }
+  }
+
+  if (flaggedEmails.length > 0) {
+  sendAlertEmail(alertEmail, flaggedEmails);
+} else {
+  Logger.log("No phishing emails detected.");
+}
+}
+
+function sendAlertEmail(email, flaggedEmails) {
+  if (!flaggedEmails || flaggedEmails.length === 0) {
+    Logger.log("No flagged emails to send.");
+    return;
+  }
+
+  var subject = "⚠️ Phishing Alert: Suspicious Emails Detected!";
+  var body = "Hello,\n\nThe following suspicious emails were detected and labeled:\n\n" + flaggedEmails.join("\n\n") + "\n\nStay Safe!\n\n- Your Security Bot";
+
+  GmailApp.sendEmail(email, subject, body);
+}
