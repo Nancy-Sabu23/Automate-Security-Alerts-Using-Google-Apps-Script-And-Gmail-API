@@ -1,4 +1,4 @@
-Code For Security Alert Script
+Code For Security Alert Script:
 
 function checkForPhishingEmails() {
   var threads = GmailApp.search('newer_than:1d'); // Scan emails from the last 24 hours
